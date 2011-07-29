@@ -1,11 +1,6 @@
 var carta;
 
-TestCase('Devo conhecer o naipe e o numero de uma carta', {
-	setUp: function(){
-	},
-	tearDown: function(){
-	},
-
+TestCase('Deve reconhecer o naipe e o numero de uma carta', {
 	"testa com cinco de copas": function(){
 		assertNoException("Deve criar carta sem gerar errors", function(){
 			carta = new Carta("5C");
@@ -42,23 +37,26 @@ TestCase('Devo conhecer o naipe e o numero de uma carta', {
 		assertEquals('getNumeroInteiro deve ser 14', 14, carta.getNumeroInteiro() );
 		assertEquals('número deve ser E', "E", carta.getNipe() );
 		assertEquals('número deve ser AE', "AE", carta.get() );
-	},
+	}
+});
+
+TestCase('Deve lancar excessao com numeros e naipes de carta invalidos', {
     "testa com numero acima de 10": function(){
-		assertException(function(){ new Carta("11C");}, "RangeError");
+		assertException(function(){ new Carta("11C") }, "RangeError");
 	},
     "testa com numero igual a 0": function(){
-		assertException(function(){ new Carta("0C");}, "RangeError");
+		assertException(function(){ new Carta("0C") }, "RangeError");
 	},
     "testa com numero menor que 0": function(){
-		assertException(function(){ new Carta("-11C");}, "RangeError");
+		assertException(function(){ new Carta("-11C") }, "RangeError");
 	},
     "testa sem numero": function(){
-		assertException(function(){ new Carta("C");}, "RangeError");
+		assertException(function(){ new Carta("C") }, "RangeError");
 	},
     "testa sem nipe": function(){
-		assertException(function(){ new Carta("1");}, "RangeError");
+		assertException(function(){ new Carta("1") }, "RangeError");
 	},
     "testa com nipe nao conhecido": function(){
-		assertException(function(){ new Carta("1B");}, "RangeError");
+		assertException(function(){ new Carta("1B") }, "RangeError");
 	}
 });
