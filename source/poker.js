@@ -1,7 +1,7 @@
 var Carta, Mao, Poker;
 
 Carta = function (carta) {
-	var prvt = {
+	var pvt = {
 		nipe: null,
 		numero: null,
 		numeroEspecial: null,
@@ -12,36 +12,31 @@ Carta = function (carta) {
 			"a": 14
 		}
 	},
-	pblc = {
-		getNumeroInteiro: function (){
-			return prvt.numero;
-		},
-		getNumero: function (){
-			return prvt.numeroEspecial;
-		},
+	pbc = {
+		getNumeroInteiro: function (){ return pvt.numero; },
+		getNumero: function (){ return pvt.numeroEspecial; },
 		setNumero: function (numero) {
-			var numeroEquivalente = prvt.numerosEspeciais[numero.toLowerCase()];
+			var numeroEquivalente = pvt.numerosEspeciais[numero.toLowerCase()];
 			if (numeroEquivalente) {
-				prvt.numero = numeroEquivalente;
-				return prvt.numeroEspecial = numero.toUpperCase();
+				pvt.numero = numeroEquivalente;
+				return pvt.numeroEspecial = numero.toUpperCase();
 			}
 			if ( numero > 0 && numero < 11 ) {
-				return prvt.numeroEspecial = prvt.numero = numero;
+				return pvt.numeroEspecial = pvt.numero = numero;
 			}
 
 			throw new RangeError("'Numero da carta nao reconhecido.");
 		},
-		getNipe: function (){ return prvt.nipe },
+		getNipe: function (){ return pvt.nipe },
 		setNipe: function (nipe) {
 			var naipesPossiveis = "PECO";
 			nipe = nipe.toUpperCase();
 			if ( nipe.length == 1 && naipesPossiveis.indexOf(nipe) >= 0 ) {
-				return prvt.nipe = nipe;
+				return pvt.nipe = nipe;
 			}
-
 			throw new RangeError("Nipe da carta não reconhecido.");
 		},
-		get: function (){ return prvt.numeroEspecial + prvt.nipe },
+		get: function (){ return pvt.numeroEspecial + pvt.nipe },
 		set: function (carta) {
 			if ( typeof carta !== undefined ){
 				var length = carta.length;
@@ -51,69 +46,126 @@ Carta = function (carta) {
 		}
 	};
 	
-	pblc.set(carta);
+	pbc.set(carta);
 
-	return pblc;
+	return pbc;
 };
 
 Mao = function() {
-	var prvt = {
+	var pvt = {
 		cartas : [],
 		MAXIMO_CARTAS: 5,
-		tenhoRoyalStraightFlush: function () {
+		hasRoyalStraightFlush: function () {
+			pbc.ordenarPorNumero()
+			var cartas = pvt.cartas,
+				nipeReferencia;
+			if ( cartas.length === this.MAXIMO_CARTAS ) {
+				nipeReferencia = cartas[0].getNipe();
+				if ( pbc.toString() === "10"+ nipeReferencia
+					+",J"+ nipeReferencia
+					+",Q"+ nipeReferencia
+					+",K"+ nipeReferencia
+					+",A"+ nipeReferencia
+				) { return true; }
+			}
 			return false;
 		},
-		tenhoStraightFlush: function () {
+		hasStraightFlush: function () {
+			pbc.ordenarPorNumero()
+			var cartas = pvt.cartas,
+				nipeReferencia, numeroReferencia, expressaoReferencia;
+			if ( cartas.length === this.MAXIMO_CARTAS ) {
+				nipeReferencia = cartas[0].getNipe();
+				numeroReferencia = cartas[0].getNumeroInteiro();
+				expressaoReferencia = numeroReferencia++ + nipeReferencia
+					+","+ numeroReferencia++ + nipeReferencia
+					+","+ numeroReferencia++ + nipeReferencia
+					+","+ numeroReferencia++ + nipeReferencia
+					+","+ numeroReferencia++ + nipeReferencia;
+				console.log(expressaoReferencia)
+				return ( pbc.toString("numeroInteiro") === expressaoReferencia )
+			}
 			return false;
 		},
-		tenhoFourKind: function () {
+		hasFourKind: function () {
 			return false;
 		},
-		tenhoFullHouse: function () {
+		hasFullHouse: function () {
 			return false;
 		},
-		tenhoFlush: function () {
+		hasFlush: function () {
 			return false;
 		},
-		tenhoStraight: function () {
+		hasStraight: function () {
 			return false;
 		},
-		tenhoThreeKind: function () {
+		hasThreeKind: function () {
 			return false;
 		},
-		tenhoDoisPares: function () {
+		hasDoisPares: function () {
 			return false;
 		},
-		tenhoUmPar: function () {
+		hasUmPar: function () {
 			return false;
 		},
 	},
-	pblc = {
-		has: function (){
-			return prvt.cartas.length;
-		},
+	pbc = {
 		add: function (carta) {
-			if ( prvt.MAXIMO_CARTAS > prvt.cartas.length ){
-				return prvt.cartas.push(carta);
+			if ( pvt.MAXIMO_CARTAS > pvt.cartas.length ){
+				pvt.cartas.push(carta);
+				return this;
 			}
-			
 			throw new Error("Maximo de cartas atingido");
 		},
+		get: function (){
+			return pvt.cartas;
+		},
+		ordenar: function (){
+			return this.ordenarPorNumero().ordenarPorNipe();
+		},
+		ordenarPorNumero: function (){
+			pvt.cartas = pvt.cartas.sort(function (carta1, carta2){
+					return carta1.getNumeroInteiro() - carta2.getNumeroInteiro();
+				});
+			return this;
+		},
+		ordenarPorNipe: function (){
+			pvt.cartas = pvt.cartas.sort(function (carta1, carta2){
+					if ( carta1.getNipe() > carta2.getNipe() ) return 1
+					if ( carta1.getNipe() < carta2.getNipe() ) return -1
+					return 0;
+				});
+			return this;
+		},
+		toString: function(opcao) {
+			var cartas = pvt.cartas,
+				cartasToTexto = [],
+				size = cartas.length;
+			for ( var i = 0; i < size; ++i ) {
+				if (opcao === "numeroInteiro"){
+					cartasToTexto.push( cartas[i].getNumeroInteiro() + cartas[i].getNipe());
+				} else {
+					cartasToTexto.push( cartas[i].get() );
+				}
+
+			}
+			return cartasToTexto.join();
+		},
 		queJogoTenho: function () {
-			if ( pvt.tenhoRoyalStraightFlush() ) return 9;
-			if ( pvt.tenhoStraightFlush() ) return 8;
-			if ( pvt.tenhoFourKind() ) return 7;
-			if ( pvt.tenhoFullHouse() ) return 6;
-			if ( pvt.tenhoFlush() ) return 5;
-			if ( pvt.tenhoStraight() ) return 4;
-			if ( pvt.tenhoThreeKind() ) return 3;
-			if ( pvt.tenhoDoisPares() ) return 2;
-			if ( pvt.tenhoUmPar() ) return 1;
+			if ( pvt.hasRoyalStraightFlush() ) return 9;
+			if ( pvt.hasStraightFlush() ) return 8;
+			if ( pvt.hasFourKind() ) return 7;
+			if ( pvt.hasFullHouse() ) return 6;
+			if ( pvt.hasFlush() ) return 5;
+			if ( pvt.hasStraight() ) return 4;
+			if ( pvt.hasThreeKind() ) return 3;
+			if ( pvt.hasDoisPares() ) return 2;
+			if ( pvt.hasUmPar() ) return 1;
 			return 0;
 		}
 	};
 
-	return pblc;
+	return pbc;
 };
 
 Poker = function (){
